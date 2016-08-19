@@ -4,12 +4,17 @@
 <dict>
 	<key>SchemeUserState</key>
 	<dict>
-		<key>Pods-Lilt-TheAmazingAudioEngine.xcscheme</key>
+		<key>Pods-Lilt.xcscheme</key>
 		<dict>
 			<key>isShown</key>
 			<false/>
 		</dict>
-		<key>Pods-Lilt.xcscheme</key>
+		<key>Pods-LiltTests.xcscheme</key>
+		<dict>
+			<key>isShown</key>
+			<false/>
+		</dict>
+		<key>TheAmazingAudioEngine.xcscheme</key>
 		<dict>
 			<key>isShown</key>
 			<false/>
@@ -17,12 +22,17 @@
 	</dict>
 	<key>SuppressBuildableAutocreation</key>
 	<dict>
-		<key>3DA677290E6FA057F0C03600</key>
+		<key>0D8FED80089F57A27A26C4FAFE2A70AA</key>
 		<dict>
 			<key>primary</key>
 			<true/>
 		</dict>
-		<key>CDB74687E9995A7E6649808F</key>
+		<key>B67D7CC0C869E1889267AE1265991AEF</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>C39404526A82526590A4834E5E37EC15</key>
 		<dict>
 			<key>primary</key>
 			<true/>

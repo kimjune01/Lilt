@@ -53,7 +53,7 @@ class SwirlyBarView: UIView {
     }
   }
 
-  required init(coder aDecoder: NSCoder) {
+  required init?(coder aDecoder: NSCoder) {
     super.init(coder:aDecoder)
   }
   
@@ -75,7 +75,7 @@ class SwirlyBar: CAShapeLayer {
   }
   let originalFrame = CGRectMake(screenWidth/2, 100, 2, 40)
   
-  override init(layer: AnyObject!) {
+  override init(layer: AnyObject) {
     super.init(layer: layer)
   }
   
@@ -131,7 +131,7 @@ class SwirlyBar: CAShapeLayer {
     path = UIBezierPath(roundedRect:CGRectMake(0, 0, 2, 40), cornerRadius:10).CGPath
   }
   
-  required init(coder aDecoder: NSCoder) {
+  required init?(coder aDecoder: NSCoder) {
     fatalError("init(coder:) has not been implemented")
   }
   

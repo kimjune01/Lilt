@@ -17,7 +17,7 @@ enum FileReadWrite {
 class ViewController: UIViewController {
   
   var audioURL:NSURL!
-
+  
   var replayButton = UIButton(frame: CGRectMake(50, 460, 220,60))
   var listeningIndicator = UIButton(frame: CGRectMake(50, 100, 220, 60))
   let slider = UISlider(frame: CGRectMake(0, 510, 320, 50))
@@ -55,7 +55,7 @@ class ViewController: UIViewController {
   
   func startListening() {
     swirlyBarView.startSwirling()
-    listeningTimer = NSTimer.scheduledTimerWithTimeInterval(listeningInterval, target: self, selector: "monitoringAudio:", userInfo: nil, repeats: true)
+    listeningTimer = NSTimer.scheduledTimerWithTimeInterval(listeningInterval, target: self, selector: #selector(ViewController.monitoringAudio(_:)), userInfo: nil, repeats: true)
     listeningIndicator.hidden = false
     listeningIndicator.alpha = 1
     listeningIndicator.setTitle("Listening...", forState: .Normal)
@@ -76,12 +76,12 @@ class ViewController: UIViewController {
     var peak:Float32 = 0
     audioController.inputAveragePowerLevel(&average, peakHoldLevel: &peak)
     silenceLevel = -slider.value
-    var isSilent:Bool = average < silenceLevel
+    let isSilent:Bool = average < silenceLevel
     if !isSilent { startRecording() }
     powerMonitor.append(average)
     let listeningFrequency: Int = Int(listeningSeconds/listeningInterval)
     if powerMonitor.count < listeningFrequency {return}
-    var recentPower = powerMonitor[powerMonitor.count-listeningFrequency ... powerMonitor.count-2]
+    let recentPower = powerMonitor[powerMonitor.count-listeningFrequency ... powerMonitor.count-2]
     var wasSilent:Bool = true
     for power in recentPower {
       if power > silenceLevel {
@@ -129,7 +129,7 @@ class ViewController: UIViewController {
   func addInstantReplayButton() {
     replayButton.backgroundColor = UIColor.blueColor().colorWithAlphaComponent(0.3)
     replayButton.setTitle("Instant Replay", forState: UIControlState.Normal)
-    replayButton.addTarget(self, action: "replayButtonTapped:", forControlEvents: .TouchUpInside)
+    replayButton.addTarget(self, action: #selector(ViewController.replayButtonTapped(_:)), forControlEvents: .TouchUpInside)
     view.addSubview(replayButton)
   }
   
@@ -148,23 +148,33 @@ class ViewController: UIViewController {
   
   func altConfigureAudio() {
     var error:NSError?
-    let result = audioController.start(&error)
+    let _: Bool
+    do {
+      try audioController.start()
+      _ = true
+    } catch let error1 as NSError {
+      error = error1
+      _ = false
+    }
     dump(error)
     
   }
   
   func outputPath(readOrWrite:FileReadWrite) -> String {
     var outputPath:String!
-    if let paths = NSSearchPathForDirectoriesInDomains(NSSearchPathDirectory.DocumentDirectory, NSSearchPathDomainMask.UserDomainMask, true) {
-      if paths.count > 0 {
-        outputPath = (paths[0] as? String)! + "/Recording.aiff"
-        if readOrWrite == .Write {
-          let manager = NSFileManager.defaultManager()
-          var error:NSError?
-          manager.removeItemAtPath(outputPath, error: &error)
-          if let e = error {
-            println("outputPath(readOrWrite:FileReadWrite) error: \(e)")
-          }
+    let paths = NSSearchPathForDirectoriesInDomains(NSSearchPathDirectory.DocumentDirectory, NSSearchPathDomainMask.UserDomainMask, true)
+    if paths.count > 0 {
+      outputPath = (paths[0] as? String)! + "/Recording.aiff"
+      if readOrWrite == .Write {
+        let manager = NSFileManager.defaultManager()
+        var error:NSError?
+        do {
+          try manager.removeItemAtPath(outputPath)
+        } catch let error1 as NSError {
+          error = error1
+        }
+        if let e = error {
+          print("outputPath(readOrWrite:FileReadWrite) error: \(e)")
         }
       }
     }
@@ -179,9 +189,13 @@ class ViewController: UIViewController {
     if recording {return}
     var error:NSError?
     recorder = AERecorder(audioController: audioController)
-    recorder?.beginRecordingToFileAtPath( outputPath(.Write), fileType: AudioFileTypeID(kAudioFileAIFFType), error: &error)
+    do {
+      try recorder?.beginRecordingToFileAtPath( outputPath(.Write), fileType: AudioFileTypeID(kAudioFileAIFFType))
+    } catch let error1 as NSError {
+      error = error1
+    }
     if let e = error {
-      println("raRRRWAREEWAR recording unsuccessful! error: \(e)")
+      print("raRRRWAREEWAR recording unsuccessful! error: \(e)")
       recorder = nil
       return
     }
@@ -219,26 +233,23 @@ class ViewController: UIViewController {
   }
   
   func playAudioAtPath(path:String){
-    var error:NSError?
-    let player = AEAudioFilePlayer.audioFilePlayerWithURL(NSURL.fileURLWithPath(path), audioController: audioController, error: &error) as? AEAudioFilePlayer
-    if let e = error {
-      println("oh noes! playAudioAtPath error: \(e)")
+    do {
+      let fileURL = NSURL.fileURLWithPath(path)
+      var channel = try AEAudioFilePlayer.audioFilePlayerWithURL(fileURL, audioController: audioController)
+      audioController.addChannels([channel])
+      
+//      channel.removeUponFinish = true
+//      stopListening()
+//      channel.completionBlock = {
+//        self.startListening()
+//      }
+    } catch {
+      print("oh noes! playAudioAtPath error")
       return
     }
-    stopListening()
-    player?.removeUponFinish = true
-    player?.completionBlock = {
-      self.startListening()
-    }
-    audioController.addChannels(NSArray(object: player!))
     
   }
-
-
-  override func didReceiveMemoryWarning() {
-    super.didReceiveMemoryWarning()
-    // Dispose of any resources that can be recreated.
-  }
-
-
 }
+
+
+
