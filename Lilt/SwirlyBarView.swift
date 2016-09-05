@@ -14,7 +14,7 @@ class SwirlyBarView: UIView {
   override init(frame:CGRect) {
     super.init(frame:frame)
     backgroundColor = UIColor.darkGrayColor()
-    displayLink = CADisplayLink(target: self, selector: "displayLinkFired:")
+    displayLink = CADisplayLink(target: self, selector: #selector(SwirlyBarView.displayLinkFired(_:)))
     displayLink.addToRunLoop(NSRunLoop.mainRunLoop(), forMode: NSDefaultRunLoopMode)
   }
   
@@ -28,7 +28,7 @@ class SwirlyBarView: UIView {
   
   
   func displayLinkFired(sender:AnyObject!){
-    animationCounter++
+    animationCounter += 1
     if swirling {
       if animationCounter%9 == 0{
         if barArray.count < numberOfBars {
@@ -38,7 +38,7 @@ class SwirlyBarView: UIView {
         }else {
           let oldSwirlyBar = barArray[(replaceCounter)%barArray.count]
           oldSwirlyBar.reset()
-          replaceCounter++
+          replaceCounter += 1
           
         }
       }

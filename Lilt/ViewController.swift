@@ -29,7 +29,7 @@ class ViewController: UIViewController {
   var inputOscilloscope:TPOscilloscopeLayer!
   var powerMonitor:[Float32] = [0.0]
   var listeningTimer: NSTimer!
-  let listeningInterval: Double = 0.05
+  let listeningInterval: Double = 0.02
   let listeningSeconds: Double = 2
   var silenceLevel:Float32 = 0
   var listening: Bool = false
@@ -164,7 +164,7 @@ class ViewController: UIViewController {
     var outputPath:String!
     let paths = NSSearchPathForDirectoriesInDomains(NSSearchPathDirectory.DocumentDirectory, NSSearchPathDomainMask.UserDomainMask, true)
     if paths.count > 0 {
-      outputPath = (paths[0] as? String)! + "/Recording.aiff"
+      outputPath = paths[0] + "/Recording.aiff"
       if readOrWrite == .Write {
         let manager = NSFileManager.defaultManager()
         var error:NSError?
@@ -230,19 +230,19 @@ class ViewController: UIViewController {
     audioController.removeInputReceiver(recorder)
     recorder = nil
     playAudioAtPath(outputPath(.Read))
+    
   }
   
   func playAudioAtPath(path:String){
+    let fileURL = NSURL.fileURLWithPath(path)
+    
     do {
-      let fileURL = NSURL.fileURLWithPath(path)
-      var channel = try AEAudioFilePlayer.audioFilePlayerWithURL(fileURL, audioController: audioController)
+      let channel = try AEAudioFilePlayer.audioFilePlayerWithURL(fileURL, audioController: audioController) as! AEAudioFilePlayer
       audioController.addChannels([channel])
       
-//      channel.removeUponFinish = true
-//      stopListening()
-//      channel.completionBlock = {
-//        self.startListening()
-//      }
+      stopListening()
+      channel.completionBlock = {self.startListening()}
+
     } catch {
       print("oh noes! playAudioAtPath error")
       return
